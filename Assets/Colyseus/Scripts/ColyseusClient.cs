@@ -11,6 +11,7 @@ public class ColyseusClient : MonoBehaviour {
     public string serverName = "localhost";
     public string port = "3553";
     public string roomName = "chat";
+	public GameObject myPlayer;
 	public GameObject playerPrefab;
 	public Dictionary<string, GameObject> playersDict = new Dictionary<string, GameObject>();
 
@@ -28,12 +29,13 @@ public class ColyseusClient : MonoBehaviour {
         chatRoom.OnJoin += OnRoomJoined;
         chatRoom.OnUpdate += OnUpdateHandler;
 
-        chatRoom.state.Listen ("players", "add", this.OnAddPlayer);
+        chatRoom.state.Listen ("players/:id", "add", this.OnAddPlayer);
         chatRoom.state.Listen ("players/:id/:axis", "replace", this.OnPlayerMove);
         chatRoom.state.Listen ("players/:id", "remove", this.OnPlayerRemoved);
         chatRoom.state.Listen (this.OnChangeFallback);
 
         int i = 0;
+
 
         while (true)
         {
@@ -48,9 +50,10 @@ public class ColyseusClient : MonoBehaviour {
 
             i++;
 
-            if (i % 50 == 0) {
-				//chatRoom.Send("axis: 10");
-            }
+            //if (i % 50 == 0) {
+				chatRoom.Send("move:" + myPlayer.transform.localPosition.x + "," + myPlayer.transform.localPosition.y);
+				i = 0;
+            //}
 			yield return new WaitForEndOfFrame();
         }
 
@@ -61,7 +64,7 @@ public class ColyseusClient : MonoBehaviour {
 	{
 		if(Input.GetKeyDown(KeyCode.Return))
 		{
-			chatRoom.Send(":add");
+			chatRoom.Send("move:" + myPlayer.transform.localPosition.x + "," + myPlayer.transform.localPosition.y);
 		}
 	}
 
@@ -81,16 +84,31 @@ public class ColyseusClient : MonoBehaviour {
         Debug.Log (path[0]);
         Debug.Log (value);
 
+		int mass = value.AsDictionary()["mass"].AsInt32();
+
 		//instancia um novo jogador.
 		string playerId = path[0];
-		GameObject playerObj = Instantiate(playerPrefab);
-		playerObj.GetComponent<Player>().id = playerId;
-		playerObj.GetComponent<Player>().color = UnityEngine.Random.ColorHSV();
+		Debug.Log("MEU ID: " + colyseus.id);
 
-		if(!playersDict.ContainsKey(playerId))
-			playersDict.Add(playerId, playerObj);
+		//verifica se o meu player.
+		if(playerId == colyseus.id)
+		{
+			GameObject playerObj = Instantiate(playerPrefab);
+			playerObj.GetComponent<Player>().id = playerId;
+			playerObj.GetComponent<Player>().color = UnityEngine.Random.ColorHSV();
+			playerObj.GetComponent<Player>().mass = mass;
+
+			if(!playersDict.ContainsKey(playerId))
+				playersDict.Add(playerId, playerObj);
+			else
+				playersDict[playerId] = playerObj;
+		}
 		else
-			playersDict[playerId] = playerObj;
+		{
+			myPlayer.GetComponent<Player>().id = playerId;
+			myPlayer.GetComponent<Player>().color = UnityEngine.Random.ColorHSV();
+			myPlayer.GetComponent<Player>().mass = mass;
+		}
 
 		Debug.Log(playerId + " entrou!");
     }
@@ -113,22 +131,46 @@ public class ColyseusClient : MonoBehaviour {
 		{
 			Destroy(playersDict[playerId]);
 			playersDict.Remove(playerId);
-
-			Debug.Log(playerId + " saiu!");
 		}
+
+		Debug.Log(playerId + " saiu!");
     }
 
     void OnChangeFallback (string[] path, string operation, MessagePackObject value)
     {
         Debug.Log ("OnChangeFallback");
         Debug.Log (operation);
-        Debug.Log (path[0]);
+		foreach(string p in path)
+		{
+			Debug.Log (p);
+
+		}
         Debug.Log (value);
     }
 
     void OnUpdateHandler (object sender, RoomUpdateEventArgs e)
     {
         Debug.Log(e.state);
+		Debug.Log(" >> " + e.state.AsDictionary()["players"].AsDictionary().Count);
+
+		//separando os players.
+		if(e.state.AsDictionary().ContainsKey("players"))
+		{
+			foreach(string playerId in e.state.AsDictionary()["players"].AsDictionary().Keys)
+			{
+				//posicao.
+				Vector2 position = new Vector2((float)e.state.AsDictionary()["players"].
+					AsDictionary()[playerId].
+					AsDictionary()["posX"].AsDouble(),
+					(float)e.state.AsDictionary()["players"].
+					AsDictionary()[playerId].
+					AsDictionary()["posY"].AsDouble());
+
+				//Debug.Log(playerId);
+				if(playersDict.ContainsKey(playerId))
+					playersDict[playerId].transform.localPosition = position;
+			}
+		}
     }
 
     void OnApplicationQuit()

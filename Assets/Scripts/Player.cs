@@ -13,6 +13,7 @@ public class Player : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		transform.localScale = Vector3.one * mass;
+		GetComponent<SpriteRenderer>().color = color;
 	}
 	
 	// Update is called once per frame
