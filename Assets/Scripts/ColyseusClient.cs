@@ -31,7 +31,7 @@ public class ColyseusClient : MonoBehaviour {
         chatRoom.OnJoin += OnRoomJoined;
         chatRoom.OnUpdate += OnUpdateHandler;
 
-		chatRoom.state.Listen("players", "add", this.OnAddPlayer);
+		chatRoom.state.Listen("players/:", "add", this.OnAddPlayer);
 		chatRoom.state.Listen ("players/:id/:axis", "replace", this.OnPlayerMove);
         chatRoom.state.Listen ("players/:id", "remove", this.OnPlayerRemoved);
         chatRoom.state.Listen (this.OnChangeFallback);
@@ -83,19 +83,18 @@ public class ColyseusClient : MonoBehaviour {
     void OnRoomJoined (object sender, EventArgs e)
     {
         Debug.Log("Joined room successfully.");
+		Debug.Log("MEU ID: " + colyseus.id);
+
     }
 
+	//instancia um novo jogador.
 	void OnAddPlayer(string[] path, object value)
 	{
 		Debug.Log("OnAddPlayer | " + PathToString(path) + " | " + ValueToString(value));
 
-		Debug.Log(ValueToDict(value)["mass"]);
-
-		int mass = (int)Convert.ToSingle(ValueToDict(value)["mass"]);
-
-		//instancia um novo jogador.
 		string playerId = path[0];
-		Debug.Log("MEU ID: " + colyseus.id);
+		int mass = (int)Convert.ToSingle(ValueToDict(value)["mass"]);
+		Vector2 position = ObjectToVector2(ValueToDict(value)["position"]);
 
 		//verifica se o meu player.
 		if(playerId != colyseus.id)
@@ -104,6 +103,7 @@ public class ColyseusClient : MonoBehaviour {
 			playerObj.GetComponent<Player>().id = playerId;
 			playerObj.GetComponent<Player>().color = UnityEngine.Random.ColorHSV();
 			playerObj.GetComponent<Player>().mass = mass;
+			playerObj.transform.localPosition = position;
 
 			if(!playersDict.ContainsKey(playerId))
 				playersDict.Add(playerId, playerObj);
@@ -178,7 +178,7 @@ public class ColyseusClient : MonoBehaviour {
 			}
 			else if(operation == "add")
 			{
-				OnAddPlayer(new string[] { playerID }, valueDict[playerID]);
+				//OnAddPlayer(new string[] { playerID }, valueDict[playerID]);
 			}
 		}
 	}
@@ -293,6 +293,23 @@ public class ColyseusClient : MonoBehaviour {
 		{
 			Debug.Log("Erro: " + value.ToString());
 			return new Dictionary<string, object>();
+		}
+	}
+
+	static Vector2 ObjectToVector2(object value)
+	{
+		List<object> vecLst = value as List<object>;
+
+		if(vecLst.Count > 1)
+		{	
+			float x =  Convert.ToSingle(vecLst[0]);
+			float y =  Convert.ToSingle(vecLst[1]);
+
+			return new Vector2(x, y);
+		}
+		else
+		{
+			return Vector2.zero;
 		}
 	}
 }

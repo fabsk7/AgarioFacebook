@@ -18,7 +18,7 @@ namespace Colyseus
 		public String name;
 
 		public DeltaContainer state = new DeltaContainer(new IndexedDictionary<string, object>());
-		//public Object state;
+		//public IndexedDictionary<string, object> state;
 
 		private int _id = 0;
 		private byte[] _previousState = null;
@@ -81,21 +81,20 @@ namespace Colyseus
 		}
 
 
-		public void SetState(object state, double remoteCurrentTime, int remoteElapsedTime)
+		public void SetState(IndexedDictionary<string, object> state, double remoteCurrentTime, int remoteElapsedTime)
 		{
-			this.state.Set((IndexedDictionary<string, object>)state);
+			this.state.Set(state);
 
 			// TODO:
 			// Create a "clock" for remoteCurrentTime / remoteElapsedTime to match the JavaScript API.
 
 			// Creates serializer.
 			var stream = new MemoryStream();
-			var s = (IndexedDictionary<string, object>)state;
-			var ss = Utils.ConvertDictionary(s);
+			var s = (IndexedDictionary<string, object>) state;
+			var dic = Utils.ConvertIndexedDictionary(s);
 
-			MsgPack.Serialize(ss, stream);
+			MsgPack.Serialize(dic, stream);
 			var ser = stream.ToArray();
-
 
 			this.OnUpdate.Invoke(this, new RoomUpdateEventArgs(this, state, null));
 			this._previousState = ser;
@@ -109,7 +108,7 @@ namespace Colyseus
 		{
 			if (requestLeave && this._id > 0)
 			{
-				this.Send(new object[] { Protocol.LEAVE_ROOM, this._id });
+				this.Send(new object[] {Protocol.LEAVE_ROOM, this._id});
 			}
 			else
 			{
@@ -123,7 +122,7 @@ namespace Colyseus
 		/// <param name="data">Data to be sent</param>
 		public void Send(object data)
 		{
-			this.client.Send(new object[] { Protocol.ROOM_DATA, this._id, data });
+			this.client.Send(new object[] {Protocol.ROOM_DATA, this._id, data});
 		}
 
 		/// <summary>Internal usage, shouldn't be called.</summary>
@@ -138,9 +137,9 @@ namespace Colyseus
 			this._previousState = Fossil.Delta.Apply(this._previousState, delta);
 
 			var stream = new MemoryStream(this._previousState);
-			var newState = MsgPack.Deserialize<object>(stream);
+			var newState = (IndexedDictionary<string, object>) MsgPack.Deserialize<object>(stream);
 
-			this.state.Set((IndexedDictionary<string, object>)newState);
+			this.state.Set(newState);
 			//this.state = state
 			this.OnUpdate.Invoke(this, new RoomUpdateEventArgs(this, this.state.data, null));
 		}
