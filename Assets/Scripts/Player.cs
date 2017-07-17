@@ -15,7 +15,7 @@ public class Player : MonoBehaviour {
 		transform.localScale = Vector3.one * mass;
 		GetComponent<SpriteRenderer>().color = color;
 	}
-	
+
 	// Update is called once per frame
 	void Update () 
 	{
@@ -23,6 +23,15 @@ public class Player : MonoBehaviour {
 		{
 			transform.Translate(new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0) * Time.deltaTime * 3f);
 		}
+	}
+
+	public void UpdateStates(Vector2 position, int mass)
+	{
+		
+		transform.localScale = Vector3.one * mass;
+
+		if(!isMine)
+		transform.localPosition = position;
 	}
 
 }
