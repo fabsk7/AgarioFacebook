@@ -163,7 +163,7 @@ namespace Colyseus
 			{
 				var state = (IndexedDictionary<string, object>) message[2];
 				var remoteCurrentTime = (double) message[3];
-				var remoteElapsedTime = Convert.ToByte(message[4]);
+				var remoteElapsedTime = Convert.ToInt32(message[4]);
 
 				room = this.rooms[roomId];
 				// JToken.Parse (message [2].ToString ())
