@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using Colyseus;
-using GameDevWare.Serialization;
+using MsgPack;
 using System.Runtime.Serialization.Formatters.Binary;
 
 public class ColyseusClient : MonoBehaviour {
@@ -15,7 +15,7 @@ public class ColyseusClient : MonoBehaviour {
     public string roomName = "chat";
 	public GameObject myPlayer;
 	public GameObject playerPrefab;
-	public Dictionary<string, GameObject> playersDict = new Dictionary<string, GameObject>();
+	public Dictionary<string, Player> playersDict = new Dictionary<string, Player>();
 
 	private Client colyseus;
 	private Room chatRoom;
@@ -31,10 +31,10 @@ public class ColyseusClient : MonoBehaviour {
         chatRoom.OnJoin += OnRoomJoined;
         chatRoom.OnUpdate += OnUpdateHandler;
 
-		//chatRoom.state.Listen("players/:", "add", this.OnAddPlayer);
-		//chatRoom.state.Listen ("players/:id/:axis", "replace", this.OnPlayerMove);
-        //chatRoom.state.Listen ("players/:id", "remove", this.OnPlayerRemoved);
-        //chatRoom.state.Listen (this.OnChangeFallback);
+		chatRoom.state.Listen("players/:", "add", this.OnAddPlayer);
+		chatRoom.state.Listen ("players/:id/:axis", "replace", this.OnPlayerMove);
+        chatRoom.state.Listen ("players/:id", "remove", this.OnPlayerRemoved);
+        chatRoom.state.Listen (this.OnChangeFallback);
 
         int i = 0;
 
@@ -52,8 +52,8 @@ public class ColyseusClient : MonoBehaviour {
 
             i++;
 
-            if (i % 30 == 0) {
-				//chatRoom.Send("move:" + myPlayer.transform.localPosition.x + "," + myPlayer.transform.localPosition.y);
+            if (i % 10 == 0) {
+				chatRoom.Send("move:" + myPlayer.transform.localPosition.x + "," + myPlayer.transform.localPosition.y);
 				i = 0;
             }
 			yield return new WaitForEndOfFrame();
@@ -70,7 +70,7 @@ public class ColyseusClient : MonoBehaviour {
 		}
 	}
 
-	void OnPlayerUpdate(string[] path, object value)
+	void OnPlayerUpdate(string[] path, MessagePackObject value)
 	{
 		Debug.Log("OnPlayerUpdate | " + PathToString(path) + " | " + ValueToString(value));
 	}
@@ -88,13 +88,13 @@ public class ColyseusClient : MonoBehaviour {
     }
 
 	//instancia um novo jogador.
-	void OnAddPlayer(string[] path, object value)
+	void OnAddPlayer(string[] path, MessagePackObject value)
 	{
 		Debug.Log("OnAddPlayer | " + PathToString(path) + " | " + ValueToString(value));
 
 		string playerId = path[0];
-		int mass = (int)Convert.ToSingle(ValueToDict(value)["mass"]);
-		Vector2 position = ObjectToVector2(ValueToDict(value)["position"]);
+		int mass = value.AsDictionary()["mass"].AsInt32();
+		Vector2 position = ListToVector2(value.AsDictionary()["position"].AsList());
 
 		//verifica se o meu player.
 		if(playerId != colyseus.id)
@@ -106,9 +106,9 @@ public class ColyseusClient : MonoBehaviour {
 			playerObj.transform.localPosition = position;
 
 			if(!playersDict.ContainsKey(playerId))
-				playersDict.Add(playerId, playerObj);
+				playersDict.Add(playerId, playerObj.GetComponent<Player>());
 			else
-				playersDict[playerId] = playerObj;
+				playersDict[playerId] = playerObj.GetComponent<Player>();
 		}
 		else
 		{
@@ -117,20 +117,20 @@ public class ColyseusClient : MonoBehaviour {
 			myPlayer.GetComponent<Player>().mass = mass;
 
 			if(!playersDict.ContainsKey(playerId))
-				playersDict.Add(playerId, myPlayer);
+				playersDict.Add(playerId, myPlayer.GetComponent<Player>());
 			else
-				playersDict[playerId] = myPlayer;
+				playersDict[playerId] = myPlayer.GetComponent<Player>();
 		}
 
 		Debug.Log(playerId + " entrou!");
 	}
 
-	void OnPlayerMove(string[] path, object value)
+	void OnPlayerMove(string[] path, MessagePackObject value)
 	{
 		Debug.Log("OnPlayerMove | " + PathToString(path) + " | " + ValueToString(value));
 	}
 
-	void OnPlayerRemoved(string[] path, object value)
+	void OnPlayerRemoved(string[] path, MessagePackObject value)
 	{
 		Debug.Log("OnPlayerRemoved | " + PathToString(path) + " | " + ValueToString(value));
 		string playerId = path[0];
@@ -145,34 +145,28 @@ public class ColyseusClient : MonoBehaviour {
 	}
 
 	//Atualiza as coisas
-	void OnChangeFallback(string[] path, string operation, object value)
+	void OnChangeFallback(string[] path, string operation, MessagePackObject value)
 	{
-		Debug.Log("OnChangeFallback | " + operation + " | " + PathToString(path) + " | " + ValueToString(value) + " | " + value.ToString());
-		
-		//separa cada informacao.
-		Dictionary<string, object> valueDict = ValueToDict(value);
-		//se vir sem valor n serve pra nada.
-		if (valueDict.Count == 0)
-			return;
+		Debug.Log("OnChangeFallback | " + operation + " | " + PathToString(path)  + " | " + value.ToString());
 
-		foreach (string key in valueDict.Keys)
+		return;
+
+		if(path[0] == "players")
 		{
-			Dictionary<string, object> data = ValueToDict(valueDict[key]);
-
-			//Debug.Log(data["position"]);
-			string playerID = key;
-
 			if (operation == "replace")
 			{
+				string playerID = path[1];
+
 				if (playersDict.ContainsKey(playerID))
 				{
-					List<object> posValue = data["position"] as List<object>;
-					if (posValue.Count > 0)
+					if(path[2] == "mass")
 					{
-						float x =  Convert.ToSingle(posValue[0]);
-						float y =  Convert.ToSingle(posValue[1]);
-						Vector2 pos = new Vector2(x, y);
-						playersDict[playerID].transform.localPosition = pos;
+						playersDict[playerID].GetComponent<Player>().SetMass(value.AsInt32());
+					}
+					else if(path[2] == "position")
+					{
+						Vector2 position = ListToVector2(value.AsList());
+						playersDict[playerID].transform.localPosition = position;
 					}
 				}
 			}
@@ -190,31 +184,27 @@ public class ColyseusClient : MonoBehaviour {
 		//Debug.Log(" >> " + e.state.AsDictionary()["players"].AsDictionary().Count);
 
 		//separando os players.
-		/*if(e.state.ContainsKey("players"))
+		if(e.state.AsDictionary().ContainsKey("players"))
 		{
-			foreach(string playerId in e.state["players"].AsDictionary().Keys)
+			foreach(string playerId in e.state.AsDictionary()["players"].AsDictionary().Keys)
 			{
-				//posicao.
-				Vector2 position = new Vector2((float)e.state.AsDictionary()["players"].
-					AsDictionary()[playerId].
-					AsDictionary()["posX"].AsDouble(),
-					(float)e.state.AsDictionary()["players"].
-					AsDictionary()[playerId].
-					AsDictionary()["posY"].AsDouble());
-
-				//massa.
-				int mass = e.state.AsDictionary()["players"].
-					AsDictionary()[playerId].
-					AsDictionary()["mass"].AsInt32();
-				
+				MessagePackObject mpObj = e.state.AsDictionary()["players"].AsDictionary()[playerId];
 				//Debug.Log(playerId);
+				Vector2 position = ListToVector2(mpObj.AsDictionary()["position"].AsList());
+				int mass = mpObj.AsDictionary()["mass"].AsInt32();
+
 				//Atualiza informacoes desse player pelo id.
 				if(playersDict.ContainsKey(playerId))
 				{
-					playersDict[playerId].GetComponent<Player>().UpdateStates(position, mass);
+					playersDict[playerId].UpdateStates(position, mass);
+				}
+				else
+				{
+					//se n existir adiciona esse player.
+					OnAddPlayer(new string[]{playerId},  mpObj);
 				}
 			}
-		}*/
+		}
     }
 
     void OnApplicationQuit()
@@ -238,19 +228,13 @@ public class ColyseusClient : MonoBehaviour {
 
 	private string ValueToString(object value)
 	{
-		if (value is IndexedDictionary<string, object>)
+		if (value is Dictionary<string, object>)
 		{
 			string val = "";
-			var dic = (IndexedDictionary<string, object>)value;
+			var dic = (Dictionary<string, object>)value;
 			foreach (var key in dic.Keys)
 			{
-			}
-
-			for (int i = 0; i < dic.Keys.Count; i++)
-			{
-				var key = dic.Keys[i];
 				val += key + ":" + dic[key];
-				if (i != dic.Keys.Count - 1)
 					val += ", ";
 			}
 
@@ -276,14 +260,13 @@ public class ColyseusClient : MonoBehaviour {
 
 	private Dictionary<string, object> ValueToDict(object value)
 	{
-		if (value is IndexedDictionary<string, object>)
+		if (value is Dictionary<string, object>)
 		{
 			Dictionary<string, object> dict = new Dictionary<string, object>();
-			var dic = (IndexedDictionary<string, object>)value;
+			var dic = (Dictionary<string, object>)value;
 			
-			for (int i = 0; i < dic.Keys.Count; i++)
+			foreach (var key in dic.Keys)
 			{
-				var key = dic.Keys[i];
 				dict.Add(key, dic[key]);
 			}
 
@@ -293,6 +276,21 @@ public class ColyseusClient : MonoBehaviour {
 		{
 			Debug.Log("Erro: " + value.ToString());
 			return new Dictionary<string, object>();
+		}
+	}
+
+	static Vector2 ListToVector2(IList<MessagePackObject> value)
+	{
+		if(value.Count > 1)
+		{	
+			float x =  value[0].AsSingle();
+			float y =  value[1].AsSingle();
+
+			return new Vector2(x, y);
+		}
+		else
+		{
+			return Vector2.zero;
 		}
 	}
 

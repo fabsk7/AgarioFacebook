@@ -25,6 +25,12 @@ public class Player : MonoBehaviour {
 		}
 	}
 
+	public void SetMass(int value)
+	{
+		mass = value;
+		transform.localScale = Vector3.one * value;
+	}
+
 	public void UpdateStates(Vector2 position, int mass)
 	{
 		
