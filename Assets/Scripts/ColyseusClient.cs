@@ -31,10 +31,10 @@ public class ColyseusClient : MonoBehaviour {
         chatRoom.OnJoin += OnRoomJoined;
         chatRoom.OnUpdate += OnUpdateHandler;
 
-		chatRoom.state.Listen("players/:", "add", this.OnAddPlayer);
-		chatRoom.state.Listen ("players/:id/:axis", "replace", this.OnPlayerMove);
-        chatRoom.state.Listen ("players/:id", "remove", this.OnPlayerRemoved);
-        chatRoom.state.Listen (this.OnChangeFallback);
+		//chatRoom.state.Listen("players/:", "add", this.OnAddPlayer);
+		//chatRoom.state.Listen ("players/:id/:axis", "replace", this.OnPlayerMove);
+        //chatRoom.state.Listen ("players/:id", "remove", this.OnPlayerRemoved);
+        //chatRoom.state.Listen (this.OnChangeFallback);
 
         int i = 0;
 
@@ -53,7 +53,7 @@ public class ColyseusClient : MonoBehaviour {
             i++;
 
             if (i % 30 == 0) {
-				chatRoom.Send("move:" + myPlayer.transform.localPosition.x + "," + myPlayer.transform.localPosition.y);
+				//chatRoom.Send("move:" + myPlayer.transform.localPosition.x + "," + myPlayer.transform.localPosition.y);
 				i = 0;
             }
 			yield return new WaitForEndOfFrame();

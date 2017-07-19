@@ -19,23 +19,26 @@ Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaE
 Loading C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
 Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\websocket-sharp.dll (this message is harmless)
 Loading C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\websocket-sharp.dll into Unity Child Domain
-- Completed reload, in  0.019 seconds
+Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\Newtonsoft.Json.dll (this message is harmless)
+Loading C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\Newtonsoft.Json.dll into Unity Child Domain
+- Completed reload, in  0.162 seconds
 Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.dll (this message is harmless)
-desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
+desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initialized touch support.
-UnloadTime: 0.987597 ms
-Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.Configuration.dll (this message is harmless)
-Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.Xml.dll (this message is harmless)
+UnloadTime: 0.904917 ms
 Setting up 4 worker threads for Enlighten.
-  Thread -> id: 3ce0 -> priority: 1 
-  Thread -> id: 72f8 -> priority: 1 
-  Thread -> id: 71b8 -> priority: 1 
-  Thread -> id: 7090 -> priority: 1 
+  Thread -> id: 788 -> priority: 1 
+  Thread -> id: 2880 -> priority: 1 
+  Thread -> id: 1d8c -> priority: 1 
+  Thread -> id: 519c -> priority: 1 
 Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\Mono.Security.dll (this message is harmless)
-Connected to server. Client id: By33puuHW
+Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.Runtime.Serialization.dll (this message is harmless)
+Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.Xml.Linq.dll (this message is harmless)
+Platform assembly: C:\Users\FAZ\Documents\GitHub\colyseus-unity3d-master\CelulaEXE\Celula_Data\Managed\System.Xml.dll (this message is harmless)
+Connected to server. Client id: HJjDmvnH-
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
@@ -43,55 +46,32 @@ Joined room successfully.
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-SALA ID: 1
+MEU ID: HJjDmvnH-
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-OnChangeFallback | add | players |  | 0
+OnUpdateHandler: RoomState
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-OnUpdateHandler: players:0
+OnUpdateHandler: RoomState
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-OnChangeFallback | replace | players |  | 0
+OnUpdateHandler: RoomState
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-OnUpdateHandler: players:0
+OnUpdateHandler: RoomState
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-OnChangeFallback | replace | players | By33puuHW:3 | 1
+7/19/2017 1:44:58 AM|Fatal|WebSocket.acceptException|WebSocketSharp.WebSocketException: The header part of a frame cannot be read from the data source.
+                             at WebSocketSharp.WsFrame+<ParseAsync>c__AnonStorey1E.<>m__22 (System.Byte[] header) [0x00000] in <filename unknown>:0 
+                             at WebSocketSharp.Ext+<ReadBytesAsync>c__AnonStorey9.<>m__2 (IAsyncResult ar) [0x00000] in <filename unknown>:0 
+Error: An exception has occurred while receiving a message.
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-OnUpdateHandler: players:1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-OnChangeFallback | replace | players | By33puuHW:3 | 1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-OnUpdateHandler: players:1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-OnChangeFallback | replace | players | By33puuHW:3, Sk0naddBW:3 | 2
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-OnUpdateHandler: players:2
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-OnChangeFallback | replace | players | By33puuHW:3 | 1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-OnUpdateHandler: players:1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
+7/19/2017 1:44:58 AM|Error|WebSocket.Close|The WebSocket connection has already been closed.
+7/19/2017 1:45:10 AM|Error|WebSocket.Close|The WebSocket connection has already been closed.

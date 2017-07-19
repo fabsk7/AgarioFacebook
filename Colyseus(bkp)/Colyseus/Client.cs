@@ -82,17 +82,17 @@ namespace Colyseus
 			}
 		}
 
-#if !WINDOWS_UWP
+		#if !WINDOWS_UWP
 		void OnCloseHandler(object sender, CloseEventArgs e)
 		{
 			this.OnClose.Emit(this, e);
 		}
-#else
-        void OnCloseHandler(object sender, EventArgs e)
-        {
-            this.OnClose.Invoke(this, e);
-        }
-#endif
+		#else
+		void OnCloseHandler(object sender, EventArgs e)
+		{
+		this.OnClose.Invoke(this, e);
+		}
+		#endif
 
 		void ParseMessage(byte[] recv)
 		{
@@ -102,8 +102,10 @@ namespace Colyseus
 			//object[] message = new object[raw.Values.Count];
 			//raw.Values.CopyTo(message, 0);
 
+			//Debug.Log(raw);
+
 			var message = raw;
-			int code = (int)message[0];
+			var code = (byte) message[0];
 
 			// Parse roomId or roomName
 			Room room = null;
@@ -113,14 +115,14 @@ namespace Colyseus
 
 			try
 			{
-				roomIdInt32 = (byte)message[1];
+				roomIdInt32 = (byte) message[1];
 				roomId = roomIdInt32.ToString();
 			}
 			catch (Exception)
 			{
 				try
 				{
-					roomName = (string)message[1];
+					roomName = (string) message[1];
 				}
 				catch (Exception)
 				{
@@ -129,12 +131,12 @@ namespace Colyseus
 
 			if (code == Protocol.USER_ID)
 			{
-				this.id = (string)message[1];
+				this.id = (string) message[1];
 				this.OnOpen.Invoke(this, EventArgs.Empty);
 			}
 			else if (code == Protocol.JOIN_ROOM)
 			{
-				roomName = (string)message[2];
+				roomName = (string) message[2];
 
 				if (this.rooms.ContainsKey(roomName))
 				{
@@ -161,9 +163,9 @@ namespace Colyseus
 			}
 			else if (code == Protocol.ROOM_STATE)
 			{
-				var state = (IndexedDictionary<string, object>)message[2];
-				var remoteCurrentTime = (double)message[3];
-				var remoteElapsedTime = (int)message[4];
+				var state = (IndexedDictionary<string, object>) message[2];
+				var remoteCurrentTime = (double) message[3];
+				var remoteElapsedTime = Convert.ToInt32(message[4]);
 
 				room = this.rooms[roomId];
 				// JToken.Parse (message [2].ToString ())
@@ -173,16 +175,13 @@ namespace Colyseus
 			{
 				room = this.rooms[roomId];
 
-				var patchBytes = (List<object>)message[2];
+				var patchBytes = (List<object>) message[2];
 				byte[] patches = new byte[patchBytes.Count];
 
-			//	foreach (object ob in patchBytes)
-			//		Debug.Log(ob.ToString());
-
 				int idx = 0;
-				foreach (object obj in patchBytes)
+				foreach (byte obj in patchBytes)
 				{
-					patches[idx] = byte.Parse(obj.ToString());
+					patches[idx] = obj;
 					idx++;
 				}
 
@@ -208,7 +207,7 @@ namespace Colyseus
 				this.rooms.Add(roomName, new Room(this, roomName));
 			}
 
-			this.Send(new object[] { Protocol.JOIN_ROOM, roomName, options });
+			this.Send(new object[] {Protocol.JOIN_ROOM, roomName, options});
 
 			return this.rooms[roomName];
 		}

@@ -59,6 +59,7 @@ namespace Fossil
 				v = (uint) ((((Int32) v) << 6) + c);
 			}
 			this.pos--;
+			//UnityEngine.Debug.Log(v);
 			return v;
 		}
 	}
