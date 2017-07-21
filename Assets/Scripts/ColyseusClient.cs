@@ -15,7 +15,9 @@ public class ColyseusClient : MonoBehaviour {
     public string roomName = "chat";
 	public GameObject myPlayer;
 	public GameObject playerPrefab;
+	public GameObject massRoom;
 	public Dictionary<string, Player> playersDict = new Dictionary<string, Player>();
+	public Dictionary<string, GameObject> massRoomDict = new Dictionary<string, GameObject>();
 
 	private Client colyseus;
 	private Room chatRoom;
@@ -202,6 +204,41 @@ public class ColyseusClient : MonoBehaviour {
 				{
 					//se n existir adiciona esse player.
 					OnAddPlayer(new string[]{playerId},  mpObj);
+				}
+			}
+		}
+		//massas da sala.
+		if(e.state.AsDictionary().ContainsKey("mass"))
+		{
+			foreach(string massId in e.state.AsDictionary()["mass"].AsDictionary().Keys)
+			{
+				MessagePackObject mpObj = e.state.AsDictionary()["mass"].AsDictionary()[massId];
+				//Debug.Log(playerId);
+				Vector2 position = ListToVector2(mpObj.AsDictionary()["position"].AsList());
+				int mass = mpObj.AsDictionary()["mass"].AsInt32();
+				bool deleted = mpObj.AsDictionary()["deleted"].AsBoolean();
+
+				//Atualiza informacoes dessa massa.
+				//a massa fica 1 minuto mandando status antes de sumir do json para verificar se foi comida ja.
+				if(!deleted)
+				{
+					if(massRoomDict.ContainsKey(massId))
+					{
+						massRoomDict[massId].transform.localPosition = position;
+					}
+					else
+					{
+						massRoomDict.Add(massId, (GameObject)Instantiate(massRoom, position, Quaternion.identity)); 
+						massRoomDict[massId].GetComponent<SpriteRenderer>().color = UnityEngine.Random.ColorHSV();
+					}					
+				}
+				else
+				{
+					if(massRoomDict.ContainsKey(massId))
+					{
+						Destroy(massRoomDict[massId]);
+						massRoomDict.Remove(massId);
+					}
 				}
 			}
 		}
